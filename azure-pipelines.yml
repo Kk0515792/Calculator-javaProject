@@ -10,20 +10,6 @@ pool:
   vmImage: ubuntu-latest
 
 steps:
-- task: SonarQubePrepare@5
-  inputs:
-    SonarQube: 'SonarQube Connection'
-    scannerMode: 'Other'
-    extraProperties: |
-      # Additional properties that will be passed to the scanner,
-      # Put one key=value per line, example:
-      # sonar.exclusions=**/*.bin
-      sonar.projectKey=Demo_Demo_AYmbKFMfumNYfjWYzELy
-- task: JavaToolInstaller@0
-  inputs:
-    versionSpec: '11'
-    jdkArchitectureOption: 'x64'
-    jdkSourceOption: 'PreInstalled'
 - task: Maven@4
   inputs:
     mavenPomFile: 'pom.xml'
@@ -34,14 +20,16 @@ steps:
     mavenVersionOption: 'Default'
     mavenAuthenticateFeed: false
     effectivePomSkip: false
-    sonarQubeRunAnalysis: true
-    sqMavenPluginVersionChoice: 'pom'
-- task: SonarQubePublish@5
+    sonarQubeRunAnalysis: false
+
+- task: CopyFiles@2
   inputs:
-    pollingTimeoutSec: '300'
+    SourceFolder: '$(agent.builddirectory)'
+    Contents: '**/*.jar'
+    TargetFolder: '$(build.artifactstagingdirectory)'
 - task: PublishBuildArtifacts@1
   inputs:
     PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-    ArtifactName: 'drop'
+    ArtifactName: 'Artifacts'
     publishLocation: 'Container'
 
