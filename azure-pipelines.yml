@@ -36,9 +36,11 @@ steps:
 - task: Docker@2
   inputs:
     containerRegistry: 'Docker Hub'
-    repository: 'examplespc'
+    repository: 'skvadapalli/myspc'
     command: 'build'
     Dockerfile: '**/Dockerfile'
+    tags: |
+      1.0
     addPipelineData: false
     addBaseImageData: false
 - task: Docker@2
@@ -50,11 +52,9 @@ steps:
 - task: Docker@2
   inputs:
     containerRegistry: 'Docker Hub'
-    repository: 'skvadapalli/examplespc'
+    repository: 'skvadapalli/myspc'
     command: 'push'
-    tags: |
-      $(Build.BuildId)
-      latest
+    tags: '1.0'
     addPipelineData: false
     addBaseImageData: false
 
