@@ -39,6 +39,9 @@ steps:
     repository: 'myrepository'
     command: 'build'
     Dockerfile: '**/Dockerfile'
+    buildContext: '/Dockerfile'
+    tags: |
+      $(Build.BuildId)
     addPipelineData: false
     addBaseImageData: false
 - task: Docker@2
