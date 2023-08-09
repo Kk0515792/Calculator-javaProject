@@ -46,7 +46,7 @@ steps:
     containerRegistry: 'Docker Hub'
     repository: 'myrepository'
     command: 'push'
-    arguments: skvadapalli/myrepository:$(Build.BuildId)'
+    arguments: 'skvadapalli/myrepository:$(Build.BuildId)'
     addPipelineData: false
     addBaseImageData: false
 
