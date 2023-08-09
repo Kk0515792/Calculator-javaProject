@@ -55,6 +55,7 @@ steps:
     tags: |
       $(Build.BuildId)
       latest
+    arguments: 'examplespc'
     addPipelineData: false
     addBaseImageData: false
 
