@@ -37,6 +37,16 @@ steps:
   inputs:
     containerRegistry: 'Docker Hub'
     repository: 'myrepository'
-    command: 'buildAndPush'
+    command: 'build'
     Dockerfile: '**/Dockerfile'
+    addPipelineData: false
+    addBaseImageData: false
+- task: Docker@2
+  inputs:
+    containerRegistry: 'Docker Hub'
+    repository: 'myrepository'
+    command: 'push'
+    arguments: skvadapalli/myrepository:$(Build.BuildId)'
+    addPipelineData: false
+    addBaseImageData: false
 
