@@ -1,52 +1,59 @@
-
+# Maven
+# Build your Java project and run tests with Apache Maven.
+# Add steps that analyze code, save build artifacts, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/java
 
 trigger:
 - main
 
 pool:
-  vmImage: 'ubuntu-latest'
+  vmImage: ubuntu-latest
 
-stages:
-  - stage: Maven_Build_stage
-    jobs:
-      - job: 
-        displayName: Building_maven_project
-        steps:
-        - task: Maven@4
-          inputs:
-            mavenPomFile: 'pom.xml'
-            goals: 'package'
-            publishJUnitResults: true
-            testResultsFiles: '**/target/surefire-reports/*.xml'
-            javaHomeOption: 'JDKVersion'
-            jdkVersionOption: '1.17'
-            jdkArchitectureOption: 'x64'
-            mavenVersionOption: Default
-            mavenAuthenticateFeed: false
-            mavenOptions: '-Xmx1024m'
-            effectivePomSkip: false
-            sonarQubeRunAnalysis: false
-        # Publish the artifact to Azure Artifacts or a file share
-        - task: CopyFiles@2
-          inputs:
-            SourceFolder: $(System.DefaultWorkingDirectory)/**/*
-            Contents: '**/*.jar'
-            TargetFolder: $(Build.ArtifactStagingDirectory)
-        - task: PublishBuildArtifacts@1
-          inputs:
-            PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-            ArtifactName: Maven_Artifacts
-            publishLocation: Container
-        # Build docker images and push it to the docker hub
-        - task: Docker@2
-          inputs:
-            containerRegistry: 'Docker Hub'
-            repository: 'skvadapalli/myspc'
-            Dockerfile: '**/Dockerfile'
-            command: buildAndPush
-            tags: 2.0
-            addPipelineData: false
-            addBaseImageData: false
-        
+steps:
+- task: Maven@4
+  inputs:
+    mavenPomFile: 'pom.xml'
+    publishJUnitResults: true
+    testResultsFiles: '**/surefire-reports/TEST-*.xml'
+    codeCoverageToolOption: 'Cobertura'
+    codeCoverageRestoreOriginalPomXml: true
+    javaHomeOption: 'JDKVersion'
+    mavenVersionOption: 'Default'
+    mavenAuthenticateFeed: false
+    effectivePomSkip: false
+    sonarQubeRunAnalysis: false
 
-
+- task: CopyFiles@2
+  inputs:
+    SourceFolder: '$(agent.builddirectory)'
+    Contents: '**/*.jar'
+    TargetFolder: '$(build.artifactstagingdirectory)'
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'Artifacts'
+    publishLocation: 'Container'
+- task: Docker@2
+  inputs:
+    containerRegistry: 'Docker Hub'
+    repository: 'skvadapalli/myspc'
+    command: 'build'
+    Dockerfile: '**/Dockerfile'
+    tags: |
+      1.0
+    addPipelineData: false
+    addBaseImageData: false
+- task: Docker@2
+  inputs:
+    containerRegistry: 'Docker Hub'
+    command: 'login'
+    addPipelineData: false
+    addBaseImageData: false
+- task: Docker@2
+  inputs:
+    containerRegistry: 'Docker Hub'
+    repository: 'skvadapalli/myspc'
+    command: 'push'
+    tags: '1.0'
+    addPipelineData: false
+    addBaseImageData: false
