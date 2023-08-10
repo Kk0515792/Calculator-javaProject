@@ -4,7 +4,7 @@ trigger:
 - main
 
 pool:
-  vmImage: 'ubuntu 22.04'
+  vmImage: 'ubuntu 16.04'
 
 stages:
   - stage: Maven_Build_stage
