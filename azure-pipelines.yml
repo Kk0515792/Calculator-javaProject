@@ -6,7 +6,6 @@ pool:
 
 stages:
   - stage: Run Maven jobs
-    displayName: Build Maven Package
     jobs:
     - job: 
       displayName: Build Maven package
