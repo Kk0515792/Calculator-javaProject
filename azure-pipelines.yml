@@ -1,26 +1,60 @@
+# Maven
+# Build your Java project and run tests with Apache Maven.
+# Add steps that analyze code, save build artifacts, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/java
+
 trigger:
 - main
 
 pool:
-  vmImage: 'ubuntu 22.04'
+  vmImage: ubuntu-latest
 
-stages:
-  - stage: Run Maven jobs
-    jobs:
-    - job: 
-      displayName: Build Maven package
-      steps:
-      - task:
-        inputs:
-          mavenPOMFile: 'pom.xml'
-          goals: package
-          publishJunitResults: true
-          testResultsFiles: '**/target/surefire-reports/*.xml'
-          allowBrokenSymlinks: true
-          javaHomeOption: 'JDKVersion'
-          jdkVersionOption: 1.17
-          jdkArchitectureOption: x64
-          mavenVersionOption: Default
-          mavenOptions: '-Xmx1024m'
-          sonarQubeRunAnalysis: false
-          
+steps:
+- task: Maven@4
+  inputs:
+    mavenPomFile: 'pom.xml'
+    publishJUnitResults: true
+    testResultsFiles: '**/surefire-reports/TEST-*.xml'
+    codeCoverageToolOption: 'Cobertura'
+    codeCoverageRestoreOriginalPomXml: true
+    javaHomeOption: 'JDKVersion'
+    mavenVersionOption: 'Default'
+    mavenAuthenticateFeed: false
+    effectivePomSkip: false
+    sonarQubeRunAnalysis: false
+
+- task: CopyFiles@2
+  inputs:
+    SourceFolder: '$(agent.builddirectory)'
+    Contents: '**/*.jar'
+    TargetFolder: '$(build.artifactstagingdirectory)'
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'Artifacts'
+    publishLocation: 'Container'
+- task: Docker@2
+  inputs:
+    containerRegistry: 'Docker Hub'
+    repository: 'skvadapalli/myspc'
+    command: 'build'
+    Dockerfile: '**/Dockerfile'
+    tags: |
+      1.0
+    addPipelineData: false
+    addBaseImageData: false
+- task: Docker@2
+  inputs:
+    containerRegistry: 'Docker Hub'
+    command: 'login'
+    addPipelineData: false
+    addBaseImageData: false
+- task: Docker@2
+  inputs:
+    containerRegistry: 'Docker Hub'
+    repository: 'skvadapalli/myspc'
+    command: 'push'
+    tags: '1.0'
+    addPipelineData: false
+    addBaseImageData: false
+
